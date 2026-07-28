@@ -3,39 +3,37 @@ package com.bl.trainconsistmanagementapp;
 import com.bl.trainconsistmanagementapp.model.PassengerBogie;
 import com.bl.trainconsistmanagementapp.service.TrainConsist;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
-        // Welcome Message
         System.out.println("=== Train Consist Management App ===");
-        System.out.println("--- UC3: Tracking Unique Bogie IDs ---");
+        System.out.println("--- UC4: Mapping Bogie IDs to Bogie Types ---");
 
-        // Requirement 1: Create a HashSet<String> for bogie IDs
-        Set<String> bogieIds = new HashSet<>();
+        // 1. Create a HashMap to store key-value pairs (Bogie ID -> Bogie Type)
+        Map<String, String> bogieTypeMap = new HashMap<>();
 
-        // Requirement 2: Add bogie IDs, including duplicate values intentionally
-        System.out.println("Adding BG101...");
-        bogieIds.add("BG101");
+        // 2. Add bogie ID mappings
+        bogieTypeMap.put("BG101", "Sleeper");
+        bogieTypeMap.put("BG102", "AC Chair");
+        bogieTypeMap.put("BG103", "First Class");
+        bogieTypeMap.put("BG104", "Goods Rectangular");
 
-        System.out.println("Adding BG102...");
-        bogieIds.add("BG102");
+        // 3. Display all mapped bogies
+        System.out.println("\n--- Registered Bogie Mappings ---");
+        for (Map.Entry<String, String> entry : bogieTypeMap.entrySet()) {
+            System.out.println("Bogie ID: " + entry.getKey() + " | Type: " + entry.getValue());
+        }
 
-        System.out.println("Adding BG103...");
-        bogieIds.add("BG103");
-
-        // Adding intentional duplicates
-        System.out.println("Adding duplicate BG101...");
-        bogieIds.add("BG101");
-
-        System.out.println("Adding duplicate BG102...");
-        bogieIds.add("BG102");
-
-        // Requirement 3 & 4: Print the final set and observe duplicate removal
-        System.out.println("\n--- Unique Bogie IDs Summary ---");
-        System.out.println("Final Bogie IDs Set: " + bogieIds);
-        System.out.println("Unique Bogie Count: " + bogieIds.size());
+        // 4. Lookup a specific bogie by ID (O(1) fast lookup)
+        String lookupId = "BG102";
+        System.out.println("\n--- Fast Lookup Demo ---");
+        if (bogieTypeMap.containsKey(lookupId)) {
+            System.out.println("Details for " + lookupId + ": " + bogieTypeMap.get(lookupId));
+        } else {
+            System.out.println("Bogie ID " + lookupId + " not found.");
+        }
     }
 }
