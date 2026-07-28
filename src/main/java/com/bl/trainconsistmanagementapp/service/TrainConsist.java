@@ -1,6 +1,8 @@
 package com.bl.trainconsistmanagementapp.service;
 
 import com.bl.trainconsistmanagementapp.model.Bogie;
+import com.bl.trainconsistmanagementapp.model.GoodsBogie;
+import com.bl.trainconsistmanagementapp.model.PassengerBogie;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,29 @@ public class TrainConsist {
     public void addBogie(Bogie bogie) {
         bogies.add(bogie);
         System.out.println("Attached: " + bogie.getBogieId());
+    }
+
+    public int getTotalPassengerCapacity() {
+        int totalSeats = 0;
+        for (Bogie bogie : bogies) {
+            if (bogie instanceof PassengerBogie pb) {
+                totalSeats += pb.getSeatCapacity();
+            }
+        }
+        return totalSeats;
+    }
+
+    /**
+     * UC3: Polymorphic iteration to calculate total goods payload capacity.
+     */
+    public double getTotalGoodsCapacity() {
+        double totalCapacity = 0;
+        for (Bogie bogie : bogies) {
+            if (bogie instanceof GoodsBogie gb) {
+                totalCapacity += gb.getMaxCapacityTons();
+            }
+        }
+        return totalCapacity;
     }
 
     public void displayConsistDetails() {
