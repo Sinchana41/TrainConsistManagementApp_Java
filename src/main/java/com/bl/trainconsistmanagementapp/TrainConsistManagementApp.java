@@ -12,40 +12,33 @@ public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
         System.out.println("=== Train Consist Management App ===");
-        System.out.println("--- UC5: Search and Remove Bogie Operations ---");
+        System.out.println("--- UC6: Reordering and Position-Based Insertion ---");
 
-        // 1. Initialize train consist list
+        // 1. Initialize initial consist list
         List<String> trainConsist = new ArrayList<>();
-        trainConsist.add("ENGINE");
-        trainConsist.add("BG101");
-        trainConsist.add("BG102");
-        trainConsist.add("BG103");
-        trainConsist.add("BG104");
+        trainConsist.add("BG101 (Sleeper)");
+        trainConsist.add("BG102 (Sleeper)");
+        trainConsist.add("BG104 (AC Chair)");
 
-        System.out.println("Initial Train Consist: " + trainConsist);
+        System.out.println("Initial Train Formation:");
+        displayConsist(trainConsist);
 
-        // 2. Search for a specific Bogie ID
-        String searchId = "BG103";
-        if (trainConsist.contains(searchId)) {
-            int position = trainConsist.indexOf(searchId);
-            System.out.println("Found " + searchId + " at position (index): " + position);
-        } else {
-            System.out.println("Bogie " + searchId + " not found in consist.");
+        // 2. Insert Pantry Car at specific position (e.g., index 2)
+        System.out.println("\nInserting 'PANTRY-01' at Position 3 (Index 2)...");
+        trainConsist.add(2, "PANTRY-01 (Pantry Car)");
+
+        // 3. Attach Engine at the front (Index 0)
+        System.out.println("Attaching 'ENG-901' at the Front (Index 0)...");
+        trainConsist.add(0, "ENG-901 (Locomotive)");
+
+        // 4. Display reordered consist
+        System.out.println("\n--- Updated Train Consist Formation ---");
+        displayConsist(trainConsist);
+    }
+
+    private static void displayConsist(List<String> consist) {
+        for (int i = 0; i < consist.size(); i++) {
+            System.out.println(" Position " + (i + 1) + ": " + consist.get(i));
         }
-
-        // 3. Remove/Detach a Bogie from the consist
-        String removeId = "BG102";
-        System.out.println("\n--- Detaching Bogie: " + removeId + " ---");
-        boolean isRemoved = trainConsist.remove(removeId);
-
-        if (isRemoved) {
-            System.out.println("Bogie " + removeId + " detached successfully.");
-        } else {
-            System.out.println("Failed to detach " + removeId + " (Not found).");
-        }
-
-        // 4. Print updated train consist and summary
-        System.out.println("\nUpdated Train Consist: " + trainConsist);
-        System.out.println("Updated Bogie Count: " + (trainConsist.size() - 1)); // excluding ENGINE
     }
 }
