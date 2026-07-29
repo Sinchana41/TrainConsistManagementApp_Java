@@ -8,11 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class TrainConsist {
 
     private List<Bogie> bogies;
+
+    // UC11: Regex Patterns for Validation
+    private static final String BOGIE_ID_REGEX = "^[A-Z]{2}-\\d{3,4}$";
+    private static final Pattern BOGIE_ID_PATTERN = Pattern.compile(BOGIE_ID_REGEX);
 
     public TrainConsist() {
         this.bogies = new ArrayList<>();
@@ -22,9 +28,23 @@ public class TrainConsist {
         return bogies.size();
     }
 
+    /**
+     * UC11: Validates Bogie ID format (e.g., PB-101, GB-2001) using Matcher.
+     */
+    public boolean isValidBogieId(String bogieId) {
+        if (bogieId == null) return false;
+        Matcher matcher = BOGIE_ID_PATTERN.matcher(bogieId);
+        return matcher.matches();
+    }
+
     public void addBogie(Bogie bogie) {
-        bogies.add(bogie);
-        System.out.println("Attached: " + bogie.getBogieId());
+        if (bogie != null && isValidBogieId(bogie.getBogieId())) {
+            bogies.add(bogie);
+            System.out.println("Attached: " + bogie.getBogieId());
+        } else {
+            String id = (bogie != null) ? bogie.getBogieId() : "null";
+            System.out.println("Rejected: Invalid Bogie ID format -> [" + id + "]");
+        }
     }
 
     public int getTotalPassengerCapacity() {
@@ -62,18 +82,12 @@ public class TrainConsist {
     // USE CASE 8: Search & Filter Functionality
     // ==========================================
 
-    /**
-     * UC8.1: Search for a bogie by its Unique ID.
-     */
     public Optional<Bogie> findBogieById(String bogieId) {
         return bogies.stream()
                 .filter(b -> b.getBogieId().equalsIgnoreCase(bogieId))
                 .findFirst();
     }
 
-    /**
-     * UC8.2: Filter bogies by Category/Type (e.g., "Passenger" or "Goods").
-     */
     public List<Bogie> filterByBogieType(String bogieType) {
         List<Bogie> filteredList = new ArrayList<>();
         for (Bogie bogie : bogies) {
@@ -84,9 +98,6 @@ public class TrainConsist {
         return filteredList;
     }
 
-    /**
-     * UC8.3: Filter passenger bogies having minimum required seat capacity.
-     */
     public List<PassengerBogie> filterPassengerBogiesByMinCapacity(int minSeats) {
         List<PassengerBogie> result = new ArrayList<>();
         for (Bogie bogie : bogies) {
