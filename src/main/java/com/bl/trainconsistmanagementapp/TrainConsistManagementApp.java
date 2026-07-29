@@ -17,7 +17,6 @@ public class TrainConsistManagementApp {
         System.out.println("==========================================");
 
         TrainConsist consist = new TrainConsist();
-
         // 1. Setup sample train consist
         consist.addBogie(new PassengerBogie("PB-101", "Sleeper", 72));
         consist.addBogie(new GoodsBogie("GB-201", "Coal Wagon", "Coal", 60.5));
