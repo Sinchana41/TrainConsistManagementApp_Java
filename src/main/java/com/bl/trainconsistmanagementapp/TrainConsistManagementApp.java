@@ -46,8 +46,6 @@ public class TrainConsistManagementApp {
         for (PassengerBogie pb : passengerBogies) {
             System.out.println(pb);
         }
-
         System.out.println("\nUC7 sorting completed...");
-
     }
 }
