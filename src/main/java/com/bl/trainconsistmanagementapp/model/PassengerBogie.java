@@ -1,6 +1,6 @@
 package com.bl.trainconsistmanagementapp.model;
 
-public class PassengerBogie extends Bogie{
+public class PassengerBogie extends Bogie implements Comparable<PassengerBogie> {
 
     private int seatCapacity;
 
@@ -11,6 +11,11 @@ public class PassengerBogie extends Bogie{
 
     public int getSeatCapacity() {
         return seatCapacity;
+    }
+
+    @Override
+    public int compareTo(PassengerBogie other) {
+        return Integer.compare(this.seatCapacity, other.seatCapacity);
     }
 
     @Override
