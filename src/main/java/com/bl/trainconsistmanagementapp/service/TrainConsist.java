@@ -6,7 +6,9 @@ import com.bl.trainconsistmanagementapp.model.PassengerBogie;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class TrainConsist {
 
@@ -93,5 +95,10 @@ public class TrainConsist {
             }
         }
         return result;
+    }
+
+    public Map<String, List<Bogie>> groupBogiesByType() {
+        return bogies.stream()
+                .collect(Collectors.groupingBy(Bogie::getBogieType));
     }
 }
