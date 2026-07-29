@@ -6,6 +6,7 @@ import com.bl.trainconsistmanagementapp.model.PassengerBogie;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class TrainConsist {
 
@@ -34,9 +35,6 @@ public class TrainConsist {
         return totalSeats;
     }
 
-    /**
-     * UC3: Polymorphic iteration to calculate total goods payload capacity.
-     */
     public double getTotalGoodsCapacity() {
         double totalCapacity = 0;
         for (Bogie bogie : bogies) {
@@ -56,5 +54,44 @@ public class TrainConsist {
                 System.out.printf("Position %d: %s%n", i + 1, bogies.get(i));
             }
         }
+    }
+
+    // ==========================================
+    // USE CASE 8: Search & Filter Functionality
+    // ==========================================
+
+    /**
+     * UC8.1: Search for a bogie by its Unique ID.
+     */
+    public Optional<Bogie> findBogieById(String bogieId) {
+        return bogies.stream()
+                .filter(b -> b.getBogieId().equalsIgnoreCase(bogieId))
+                .findFirst();
+    }
+
+    /**
+     * UC8.2: Filter bogies by Category/Type (e.g., "Passenger" or "Goods").
+     */
+    public List<Bogie> filterByBogieType(String bogieType) {
+        List<Bogie> filteredList = new ArrayList<>();
+        for (Bogie bogie : bogies) {
+            if (bogie.getBogieType().equalsIgnoreCase(bogieType)) {
+                filteredList.add(bogie);
+            }
+        }
+        return filteredList;
+    }
+
+    /**
+     * UC8.3: Filter passenger bogies having minimum required seat capacity.
+     */
+    public List<PassengerBogie> filterPassengerBogiesByMinCapacity(int minSeats) {
+        List<PassengerBogie> result = new ArrayList<>();
+        for (Bogie bogie : bogies) {
+            if (bogie instanceof PassengerBogie pb && pb.getSeatCapacity() >= minSeats) {
+                result.add(pb);
+            }
+        }
+        return result;
     }
 }
