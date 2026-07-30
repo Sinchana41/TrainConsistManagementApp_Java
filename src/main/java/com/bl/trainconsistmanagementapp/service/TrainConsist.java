@@ -112,4 +112,20 @@ public class TrainConsist {
         return bogies.stream()
                 .collect(Collectors.groupingBy(Bogie::getBogieType));
     }
+
+    //UC- 12
+    public boolean checkSafetyCompliance() {
+        return bogies.stream()
+                .filter(bogie -> bogie instanceof GoodsBogie)
+                .map(bogie -> (GoodsBogie) bogie)
+                .allMatch(gb -> {
+                    boolean isCylindrical = gb.getBogieType().equalsIgnoreCase("Cylindrical")
+                            || gb.getBogieType().equalsIgnoreCase("Tanker");
+                    if (isCylindrical) {
+                        return gb.getCargoType().equalsIgnoreCase("Petroleum")
+                                || gb.getCargoType().startsWith("PET-");
+                    }
+                    return true; // Non-cylindrical bogies pass by default
+                });
+    }
 }

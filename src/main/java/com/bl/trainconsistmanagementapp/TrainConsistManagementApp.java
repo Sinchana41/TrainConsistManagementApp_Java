@@ -1,72 +1,59 @@
 package com.bl.trainconsistmanagementapp;
 
 import com.bl.trainconsistmanagementapp.model.GoodsBogie;
-import com.bl.trainconsistmanagementapp.model.PassengerBogie;
-import com.bl.trainconsistmanagementapp.service.TrainConsist;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrainConsistManagementApp {
 
-    // UC11 Regex Patterns
-    private static final String TRAIN_ID_REGEX = "^TRN-\\d{4}$";
-    private static final String CARGO_CODE_REGEX = "^PET-[A-Z]{2}$";
-
-    private static final Pattern TRAIN_ID_PATTERN = Pattern.compile(TRAIN_ID_REGEX);
-    private static final Pattern CARGO_CODE_PATTERN = Pattern.compile(CARGO_CODE_REGEX);
-
-    /**
-     * UC11: Validates Train ID format (e.g., TRN-1234)
-     */
-    public static boolean validateTrainId(String trainId) {
-        if (trainId == null) return false;
-        Matcher matcher = TRAIN_ID_PATTERN.matcher(trainId);
-        return matcher.matches();
-    }
-
-    /**
-     * UC11: Validates Cargo Code format (e.g., PET-AB)
-     */
-    public static boolean validateCargoCode(String cargoCode) {
-        if (cargoCode == null) return false;
-        Matcher matcher = CARGO_CODE_PATTERN.matcher(cargoCode);
-        return matcher.matches();
-    }
 
     public static void main(String[] args) {
         System.out.println("=================================================");
-        System.out.println(" UC11: Validate Train ID & Cargo Codes (Regex)  ");
+        System.out.println(" UC12: Safety Compliance Check for Goods Bogies ");
         System.out.println("=================================================");
 
-        // 1. Validate Train IDs
-        String[] testTrainIds = {"TRN-1234", "TRAIN12", "TRN12A", "TRN-9876"};
-        System.out.println("\n--- Validating Train IDs ---");
-        for (String id : testTrainIds) {
-            boolean isValid = validateTrainId(id);
-            System.out.printf("Train ID [%s] -> %s%n", id, isValid ? "VALID" : "INVALID");
-        }
+        // --- Scenario 1: SAFE TRAIN CONSIST ---
+        System.out.println("\n--- Scenario 1: Validating Safe Train Consist ---");
+        List<GoodsBogie> safeGoodsBogies = new ArrayList<>();
+        safeGoodsBogies.add(new GoodsBogie("GB-101", "Cylindrical", "Petroleum", 50.0));
+        safeGoodsBogies.add(new GoodsBogie("GB-102", "Box Car", "Coal", 60.0));
+        safeGoodsBogies.add(new GoodsBogie("GB-103", "Cylindrical", "PET-AB", 45.0));
 
-        // 2. Validate Cargo Codes
-        String[] testCargoCodes = {"PET-AB", "PET-12", "PET-XYZ", "PET-CD"};
-        System.out.println("\n--- Validating Cargo Codes ---");
-        for (String code : testCargoCodes) {
-            boolean isValid = validateCargoCode(code);
-            System.out.printf("Cargo Code [%s] -> %s%n", code, isValid ? "VALID" : "INVALID");
-        }
+        // Display Goods Bogies
+        safeGoodsBogies.forEach(System.out::println);
 
-        // 3. Test Bogie Validation inside TrainConsist
-        System.out.println("\n--- Testing Bogie Attachment Validation ---");
-        TrainConsist consist = new TrainConsist();
+        // Convert list to Stream and apply allMatch() for safety validation
+        boolean isSafeConsist = safeGoodsBogies.stream()
+                .allMatch(gb -> {
+                    if (gb.getBogieType().equalsIgnoreCase("Cylindrical")) {
+                        return gb.getCargoType().equalsIgnoreCase("Petroleum") || gb.getCargoType().startsWith("PET-");
+                    }
+                    return true;
+                });
 
-        // Valid Bogies
-        consist.addBogie(new PassengerBogie("PB-101", "Sleeper", 72));
-        consist.addBogie(new GoodsBogie("GB-201", "Tanker", "PET-AB", 45.0));
+        System.out.println("\nSafety Compliance Result: " + (isSafeConsist ? "TRAIN IS SAFE & COMPLIANT" : "SAFETY VIOLATION DETECTED"));
 
-        // Invalid Bogie IDs (rejected by regex check)
-        consist.addBogie(new PassengerBogie("PASS12", "AC Chair", 56));
-        consist.addBogie(new GoodsBogie("101-GB", "Coal Wagon", "Coal", 60.0));
+        // --- Scenario 2: UNSAFE TRAIN CONSIST (Cylindrical carrying Coal) ---
+        System.out.println("\n--- Scenario 2: Validating Unsafe Train Consist ---");
+        List<GoodsBogie> unsafeGoodsBogies = new ArrayList<>();
+        unsafeGoodsBogies.add(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
+        unsafeGoodsBogies.add(new GoodsBogie("GB-202", "Cylindrical", "Coal", 65.0)); // UNSAFE: Cylindrical cannot carry Coal!
+        unsafeGoodsBogies.add(new GoodsBogie("GB-203", "Flatcar", "Steel", 70.0));
 
-        consist.displayConsistDetails();
+        // Display Goods Bogies
+        unsafeGoodsBogies.forEach(System.out::println);
+
+        // Convert list to Stream and apply allMatch() for safety validation
+        boolean isUnsafeConsist = unsafeGoodsBogies.stream()
+                .allMatch(gb -> {
+                    if (gb.getBogieType().equalsIgnoreCase("Cylindrical")) {
+                        return gb.getCargoType().equalsIgnoreCase("Petroleum") || gb.getCargoType().startsWith("PET-");
+                    }
+                    return true;
+                });
+
+        System.out.println("\nSafety Compliance Result: " + (isUnsafeConsist ? "TRAIN IS SAFE & COMPLIANT" : "SAFETY VIOLATION DETECTED (Cylindrical carrying illegal cargo)"));
+
     }
 }
