@@ -12,64 +12,55 @@ public class TrainConsistManagementApp {
 
 
     public static void main(String[] args) {
-        System.out.println(" UC13: Performance Comparison (Loops vs Streams) ");
 
-        // 1. Prepare a large dataset of Bogie objects for realistic benchmarking
-        List<Bogie> testBogies = new ArrayList<>();
-        int dataSize = 100_000; // 100k records
+        System.out.println("UC14: Parallel Stream Processing vs Sequential");
 
-        System.out.println("\nGenerating " + dataSize + " sample bogies...");
-        for (int i = 0; i < dataSize; i++) {
+        int datasetSize = 1_000_000;
+        System.out.println("\nGenerating " + datasetSize + " sample bogie records...");
+
+        List<Bogie> largeBogieList = new ArrayList<>(datasetSize);
+        for (int i = 0; i < datasetSize; i++) {
             if (i % 2 == 0) {
-                testBogies.add(new PassengerBogie("PB-" + i, "Sleeper", 72));
+                largeBogieList.add(new PassengerBogie("PB-" + i, "Sleeper", 72));
             } else {
-                testBogies.add(new GoodsBogie("GB-" + i, "Box Car", "Coal", 60.0));
+                largeBogieList.add(new GoodsBogie("GB-" + i, "Box Car", "Coal", 60.0));
             }
         }
 
-        // 2. Benchmarking Loop-Based Filtering
-        long loopStartTime = System.nanoTime();
+        System.out.println("Available CPU Cores: " + Runtime.getRuntime().availableProcessors());
 
-        List<Bogie> loopFiltered = new ArrayList<>();
-        for (Bogie b : testBogies) {
-            if (b instanceof PassengerBogie pb && pb.getSeatCapacity() >= 50) {
-                loopFiltered.add(pb);
-            }
-        }
+        // 2. Sequential Stream Processing
+        long seqStart =  System.nanoTime();
+        List<Bogie> seqResult = largeBogieList.stream()
+                .filter(b -> b instanceof PassengerBogie pb && pb.getSeatCapacity() > 50)
+                .collect(Collectors.toList());
+        long seqEnd = System.nanoTime();
+        long seqDuration = seqEnd - seqStart;
 
-        long loopEndTime = System.nanoTime();
-        long loopDuration = loopEndTime - loopStartTime;
+        System.out.println("\n--- Sequential Stream Execution ---");
+        System.out.println("Processed Count : " + seqResult.size());
+        System.out.printf("Execution Time  : %.3f ms%n", seqDuration / 1_000_000.0);
 
-        System.out.println("\n--- Loop-Based Processing ---");
-        System.out.println("Filtered Items Count : " + loopFiltered.size());
-        System.out.println("Execution Time (ns)  : " + loopDuration + " ns");
-        System.out.printf("Execution Time (ms)  : %.3f ms%n", loopDuration / 1_000_000.0);
+        // 3. Parallel Stream Processing
+        long parallelStart = System.nanoTime();
 
-        // 3. Benchmarking Stream-Based Filtering
-        long streamStartTime = System.nanoTime();
-
-        List<Bogie> streamFiltered = testBogies.stream()
-                .filter(b -> b instanceof PassengerBogie)
-                .filter(b -> ((PassengerBogie) b).getSeatCapacity() >= 50)
+        List<Bogie> parallelResult = largeBogieList.parallelStream()
+                .filter(b -> b instanceof PassengerBogie pb && pb.getSeatCapacity() > 50)
                 .collect(Collectors.toList());
 
-        long streamEndTime = System.nanoTime();
-        long streamDuration = streamEndTime - streamStartTime;
+        long parallelEnd = System.nanoTime();
+        long parallelDuration = parallelEnd - parallelStart;
 
-        System.out.println("\n--- Stream-Based Processing ---");
-        System.out.println("Filtered Items Count : " + streamFiltered.size());
-        System.out.println("Execution Time (ns)  : " + streamDuration + " ns");
-        System.out.printf("Execution Time (ms)  : %.3f ms%n", streamDuration / 1_000_000.0);
+        System.out.println("\n--- Parallel Stream Execution ---");
+        System.out.println("Processed Count : " + parallelResult.size());
+        System.out.printf("Execution Time  : %.3f ms%n", parallelDuration / 1_000_000.0);
 
-        // 4. Comparison Summary
-        System.out.println("              BENCHMARK SUMMARY                  ");
-        System.out.println("=================================================");
-        if (loopDuration < streamDuration) {
-            long diff = streamDuration - loopDuration;
-            System.out.printf("Traditional Loop was FASTER by %d ns (%.3f ms)%n", diff, diff / 1_000_000.0);
+        System.out.println("SUMMARY");
+        if (parallelDuration < seqDuration) {
+            double speedup = (double) seqDuration / parallelDuration;
+            System.out.printf("Parallel Stream was FASTER by %.2fx speedup!%n", speedup);
         } else {
-            long diff = loopDuration - streamDuration;
-            System.out.printf("Stream Pipeline was FASTER by %d ns (%.3f ms)%n", diff, diff / 1_000_000.0);
+            System.out.println("Sequential Stream was faster (overhead outweighed parallel gains).");
         }
     }
 }
