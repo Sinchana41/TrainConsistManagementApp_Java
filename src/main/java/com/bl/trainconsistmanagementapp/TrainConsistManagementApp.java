@@ -6,6 +6,7 @@ import com.bl.trainconsistmanagementapp.model.PassengerBogie;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TrainConsistManagementApp {
@@ -13,54 +14,66 @@ public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
 
-        System.out.println("UC14: Parallel Stream Processing vs Sequential");
+        System.out.println(" UC15: Data Grouping & Aggregation (Collectors)   ");
 
-        int datasetSize = 1_000_000;
-        System.out.println("\nGenerating " + datasetSize + " sample bogie records...");
+        // 1. Prepare Sample Dataset
+        List<Bogie> trainConsist = new ArrayList<>();
+        trainConsist.add(new PassengerBogie("PB-101", "Sleeper", 72));
+        trainConsist.add(new PassengerBogie("PB-102", "AC First Class", 24));
+        trainConsist.add(new PassengerBogie("PB-103", "Sleeper", 72));
+        trainConsist.add(new PassengerBogie("PB-104", "AC Chair Car", 78));
 
-        List<Bogie> largeBogieList = new ArrayList<>(datasetSize);
-        for (int i = 0; i < datasetSize; i++) {
-            if (i % 2 == 0) {
-                largeBogieList.add(new PassengerBogie("PB-" + i, "Sleeper", 72));
-            } else {
-                largeBogieList.add(new GoodsBogie("GB-" + i, "Box Car", "Coal", 60.0));
-            }
-        }
+        trainConsist.add(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
+        trainConsist.add(new GoodsBogie("GB-202", "Box Car", "Coal", 65.0));
+        trainConsist.add(new GoodsBogie("GB-203", "Cylindrical", "Petroleum", 55.0));
+        trainConsist.add(new GoodsBogie("GB-204", "Box Car", "Coal", 60.0));
+        trainConsist.add(new GoodsBogie("GB-205", "Flatcar", "Steel Coils", 70.0));
 
-        System.out.println("Available CPU Cores: " + Runtime.getRuntime().availableProcessors());
+        // AGGREGATION 1: Group Bogies by Bogie Type
+        System.out.println("\n--- 1. Grouping Bogies by Bogie Type ---");
+        Map<String, List<Bogie>> bogiesByType = trainConsist.stream()
+                .collect(Collectors.groupingBy(Bogie::getBogieType));
 
-        // 2. Sequential Stream Processing
-        long seqStart =  System.nanoTime();
-        List<Bogie> seqResult = largeBogieList.stream()
-                .filter(b -> b instanceof PassengerBogie pb && pb.getSeatCapacity() > 50)
-                .collect(Collectors.toList());
-        long seqEnd = System.nanoTime();
-        long seqDuration = seqEnd - seqStart;
+        bogiesByType.forEach((type, list) -> {
+            System.out.println("Type: [" + type + "] -> Total: " + list.size() + " bogies");
+            list.forEach(b -> System.out.println("   - " + b));
+        });
 
-        System.out.println("\n--- Sequential Stream Execution ---");
-        System.out.println("Processed Count : " + seqResult.size());
-        System.out.printf("Execution Time  : %.3f ms%n", seqDuration / 1_000_000.0);
+        // AGGREGATION 2: Count Bogie Types
+        System.out.println("\n--- 2. Bogie Count Summary by Type ---");
+        Map<String, Long> bogieCounts = trainConsist.stream()
+                .collect(Collectors.groupingBy(Bogie::getBogieType, Collectors.counting()));
 
-        // 3. Parallel Stream Processing
-        long parallelStart = System.nanoTime();
+        bogieCounts.forEach((type, count) ->
+                System.out.printf("   • %-15s : %d bogies%n", type, count)
+        );
 
-        List<Bogie> parallelResult = largeBogieList.parallelStream()
-                .filter(b -> b instanceof PassengerBogie pb && pb.getSeatCapacity() > 50)
-                .collect(Collectors.toList());
+        // AGGREGATION 3: Total Cargo Weight Grouped by Cargo Type
+        System.out.println("\n--- 3. Total Goods Cargo Weight by Cargo Type ---");
+        Map<String, Double> totalWeightByCargo = trainConsist.stream()
+                .filter(b -> b instanceof GoodsBogie)
+                .map(b -> (GoodsBogie) b)
+                .collect(Collectors.groupingBy(
+                        GoodsBogie::getCargoType,
+                        Collectors.summingDouble(GoodsBogie::getMaxCapacityTons)
+                ));
 
-        long parallelEnd = System.nanoTime();
-        long parallelDuration = parallelEnd - parallelStart;
+        totalWeightByCargo.forEach((cargo, totalTons) ->
+                System.out.printf("   • Cargo: %-12s | Total Capacity: %.2f Tons%n", cargo, totalTons)
+        );
 
-        System.out.println("\n--- Parallel Stream Execution ---");
-        System.out.println("Processed Count : " + parallelResult.size());
-        System.out.printf("Execution Time  : %.3f ms%n", parallelDuration / 1_000_000.0);
+        // AGGREGATION 4: Average Passenger Seats by Coach Class
+        System.out.println("\n--- 4. Average Passenger Capacity per Coach Class ---");
+        Map<String, Double> avgSeatsByClass = trainConsist.stream()
+                .filter(b -> b instanceof PassengerBogie)
+                .map(b -> (PassengerBogie) b)
+                .collect(Collectors.groupingBy(
+                        PassengerBogie::getBogieType,
+                        Collectors.averagingInt(PassengerBogie::getSeatCapacity)
+                ));
 
-        System.out.println("SUMMARY");
-        if (parallelDuration < seqDuration) {
-            double speedup = (double) seqDuration / parallelDuration;
-            System.out.printf("Parallel Stream was FASTER by %.2fx speedup!%n", speedup);
-        } else {
-            System.out.println("Sequential Stream was faster (overhead outweighed parallel gains).");
-        }
+        avgSeatsByClass.forEach((coachClass, avgSeats) ->
+                System.out.printf("   • Class: %-15s | Avg Seat Capacity: %.1f seats%n", coachClass, avgSeats)
+        );
     }
 }
