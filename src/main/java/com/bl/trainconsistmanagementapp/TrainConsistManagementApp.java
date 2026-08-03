@@ -1,58 +1,43 @@
 package com.bl.trainconsistmanagementapp;
 
-import com.bl.trainconsistmanagementapp.exception.BogieNotFoundException;
-import com.bl.trainconsistmanagementapp.exception.InvalidBogieException;
+import com.bl.trainconsistmanagementapp.model.Bogie;
 import com.bl.trainconsistmanagementapp.model.GoodsBogie;
 import com.bl.trainconsistmanagementapp.model.PassengerBogie;
-import com.bl.trainconsistmanagementapp.service.TrainConsist;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.bl.trainconsistmanagementapp.fileio.FileIOAndPersistence.*;
 
 public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
 
-        System.out.println(" UC16: Custom Exceptions & Fault Tolerance       ");
-        TrainConsist consist = new TrainConsist();
+        System.out.println(" UC17: Persistence and File I/O for Consist");
 
-        // Scenario 1: Handling Invalid Bogie Attachment
-        System.out.println("\n--- Test 1: Adding Valid and Invalid Bogies ---");
+        // 1. Prepare sample bogies
+        List<Bogie> originalConsist = new ArrayList<>();
+        originalConsist.add(new PassengerBogie("PB-101", "Sleeper", 72));
+        originalConsist.add(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
+        originalConsist.add(new PassengerBogie("PB-102", "AC Chair", 56));
+        originalConsist.add(new GoodsBogie("GB-202", "Box Car", "Coal", 65.0));
 
-        try {
-            consist.addBogie(new PassengerBogie("PB-101", "Sleeper", 72));
-            consist.addBogie(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
+        // 2. Export/Save consist configuration to file
+        System.out.println("\nStep 1: Saving Consist Data to File");
+        saveConsistToFile(originalConsist, FILE_PATH);
 
-            // Intentionally adding invalid ID format
-            System.out.println("Attempting to attach invalid Bogie ID 'INVALID_ID'...");
-            consist.addBogie(new PassengerBogie("INVALID_ID", "AC Chair", 56));
-        } catch (InvalidBogieException e) {
-            System.out.println("Caught Exception: " + e.getMessage());
+        // 3. Import/Load consist configuration from file
+        System.out.println("\nStep 2: Restoring Consist Data from File");
+        List<Bogie> restoredConsist = loadConsistFromFile(FILE_PATH);
+
+        // 4. Verify loaded records
+        System.out.println("\nStep 3: Verifying Loaded Consist");
+        for (int i = 0; i < restoredConsist.size(); i++) {
+            System.out.printf("Position %d: %s%n", i + 1, restoredConsist.get(i));
         }
 
-        consist.displayConsistDetails();
-
-        // Scenario 2: Handling Non-Existent Bogie Search
-        System.out.println("\n--- Test 2: Searching for Missing Bogie ---");
-
-        try {
-            System.out.println("Searching for Bogie 'PB-999'...");
-            consist.findBogieById("PB-999");
-        } catch (BogieNotFoundException e) {
-            System.out.println("Caught Exception: " + e.getMessage());
-        }
-
-        // Scenario 3: Handling Non-Existent Bogie Removal
-        System.out.println("\n--- Test 3: Detaching Missing Bogie ---");
-
-        try {
-            System.out.println("Attempting to detach Bogie 'GB-201'...");
-            consist.removeBogieById("GB-201"); // Succeeds
-
-            System.out.println("Attempting to detach Bogie 'GB-201' again...");
-            consist.removeBogieById("GB-201"); // Fails, already removed
-        } catch (BogieNotFoundException e) {
-            System.out.println("Caught Exception: " + e.getMessage());
-        } finally {
-            System.out.println("\n--- Final Status Verification ---");
-            consist.displayConsistDetails();
-        }
+        // Clean up temporary benchmark file
+        new File(FILE_PATH).deleteOnExit();
     }
 }
