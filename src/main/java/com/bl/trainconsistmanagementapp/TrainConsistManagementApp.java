@@ -1,79 +1,58 @@
 package com.bl.trainconsistmanagementapp;
 
-import com.bl.trainconsistmanagementapp.model.Bogie;
+import com.bl.trainconsistmanagementapp.exception.BogieNotFoundException;
+import com.bl.trainconsistmanagementapp.exception.InvalidBogieException;
 import com.bl.trainconsistmanagementapp.model.GoodsBogie;
 import com.bl.trainconsistmanagementapp.model.PassengerBogie;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.bl.trainconsistmanagementapp.service.TrainConsist;
 
 public class TrainConsistManagementApp {
 
-
     public static void main(String[] args) {
 
-        System.out.println(" UC15: Data Grouping & Aggregation (Collectors)   ");
+        System.out.println(" UC16: Custom Exceptions & Fault Tolerance       ");
+        TrainConsist consist = new TrainConsist();
 
-        // 1. Prepare Sample Dataset
-        List<Bogie> trainConsist = new ArrayList<>();
-        trainConsist.add(new PassengerBogie("PB-101", "Sleeper", 72));
-        trainConsist.add(new PassengerBogie("PB-102", "AC First Class", 24));
-        trainConsist.add(new PassengerBogie("PB-103", "Sleeper", 72));
-        trainConsist.add(new PassengerBogie("PB-104", "AC Chair Car", 78));
+        // Scenario 1: Handling Invalid Bogie Attachment
+        System.out.println("\n--- Test 1: Adding Valid and Invalid Bogies ---");
 
-        trainConsist.add(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
-        trainConsist.add(new GoodsBogie("GB-202", "Box Car", "Coal", 65.0));
-        trainConsist.add(new GoodsBogie("GB-203", "Cylindrical", "Petroleum", 55.0));
-        trainConsist.add(new GoodsBogie("GB-204", "Box Car", "Coal", 60.0));
-        trainConsist.add(new GoodsBogie("GB-205", "Flatcar", "Steel Coils", 70.0));
+        try {
+            consist.addBogie(new PassengerBogie("PB-101", "Sleeper", 72));
+            consist.addBogie(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
 
-        // AGGREGATION 1: Group Bogies by Bogie Type
-        System.out.println("\n--- 1. Grouping Bogies by Bogie Type ---");
-        Map<String, List<Bogie>> bogiesByType = trainConsist.stream()
-                .collect(Collectors.groupingBy(Bogie::getBogieType));
+            // Intentionally adding invalid ID format
+            System.out.println("Attempting to attach invalid Bogie ID 'INVALID_ID'...");
+            consist.addBogie(new PassengerBogie("INVALID_ID", "AC Chair", 56));
+        } catch (InvalidBogieException e) {
+            System.out.println("Caught Exception: " + e.getMessage());
+        }
 
-        bogiesByType.forEach((type, list) -> {
-            System.out.println("Type: [" + type + "] -> Total: " + list.size() + " bogies");
-            list.forEach(b -> System.out.println("   - " + b));
-        });
+        consist.displayConsistDetails();
 
-        // AGGREGATION 2: Count Bogie Types
-        System.out.println("\n--- 2. Bogie Count Summary by Type ---");
-        Map<String, Long> bogieCounts = trainConsist.stream()
-                .collect(Collectors.groupingBy(Bogie::getBogieType, Collectors.counting()));
+        // Scenario 2: Handling Non-Existent Bogie Search
+        System.out.println("\n--- Test 2: Searching for Missing Bogie ---");
 
-        bogieCounts.forEach((type, count) ->
-                System.out.printf("   • %-15s : %d bogies%n", type, count)
-        );
+        try {
+            System.out.println("Searching for Bogie 'PB-999'...");
+            consist.findBogieById("PB-999");
+        } catch (BogieNotFoundException e) {
+            System.out.println("Caught Exception: " + e.getMessage());
+        }
 
-        // AGGREGATION 3: Total Cargo Weight Grouped by Cargo Type
-        System.out.println("\n--- 3. Total Goods Cargo Weight by Cargo Type ---");
-        Map<String, Double> totalWeightByCargo = trainConsist.stream()
-                .filter(b -> b instanceof GoodsBogie)
-                .map(b -> (GoodsBogie) b)
-                .collect(Collectors.groupingBy(
-                        GoodsBogie::getCargoType,
-                        Collectors.summingDouble(GoodsBogie::getMaxCapacityTons)
-                ));
+        // Scenario 3: Handling Non-Existent Bogie Removal
+        System.out.println("\n--- Test 3: Detaching Missing Bogie ---");
 
-        totalWeightByCargo.forEach((cargo, totalTons) ->
-                System.out.printf("   • Cargo: %-12s | Total Capacity: %.2f Tons%n", cargo, totalTons)
-        );
+        try {
+            System.out.println("Attempting to detach Bogie 'GB-201'...");
+            consist.removeBogieById("GB-201"); // Succeeds
 
-        // AGGREGATION 4: Average Passenger Seats by Coach Class
-        System.out.println("\n--- 4. Average Passenger Capacity per Coach Class ---");
-        Map<String, Double> avgSeatsByClass = trainConsist.stream()
-                .filter(b -> b instanceof PassengerBogie)
-                .map(b -> (PassengerBogie) b)
-                .collect(Collectors.groupingBy(
-                        PassengerBogie::getBogieType,
-                        Collectors.averagingInt(PassengerBogie::getSeatCapacity)
-                ));
-
-        avgSeatsByClass.forEach((coachClass, avgSeats) ->
-                System.out.printf("   • Class: %-15s | Avg Seat Capacity: %.1f seats%n", coachClass, avgSeats)
-        );
+            System.out.println("Attempting to detach Bogie 'GB-201' again...");
+            consist.removeBogieById("GB-201"); // Fails, already removed
+        } catch (BogieNotFoundException e) {
+            System.out.println("Caught Exception: " + e.getMessage());
+        } finally {
+            System.out.println("\n--- Final Status Verification ---");
+            consist.displayConsistDetails();
+        }
     }
 }
