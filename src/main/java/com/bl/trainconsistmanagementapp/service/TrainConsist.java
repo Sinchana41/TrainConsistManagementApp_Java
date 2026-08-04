@@ -68,7 +68,7 @@ public class TrainConsist {
     }
 
     public void displayConsistDetails() {
-        System.out.println("\n--- Current Train Consist Details ---");
+        System.out.println("Current Train Consist Details");
         if (bogies.isEmpty()) {
             System.out.println("No bogies attached.");
         } else {
