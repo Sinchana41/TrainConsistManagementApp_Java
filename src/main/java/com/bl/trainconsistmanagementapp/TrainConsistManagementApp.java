@@ -1,54 +1,74 @@
 package com.bl.trainconsistmanagementapp;
 
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class TrainConsistManagementApp {
 
-    public static int linearSearch(String[] bogieIds, String searchKey) {
-        // Sequential Traversal from index 0 to length - 1
-        for (int i = 0; i < bogieIds.length; i++) {
-            // Equality Comparison using equalsIgnoreCase for safe string comparison
-            if (bogieIds[i].equalsIgnoreCase(searchKey)) {
-                return i; // Match found -> Early Termination
+    public static int binarySearch(String[] sortedBogieIds, String searchKey) {
+        int low = 0;
+        int high = sortedBogieIds.length - 1;
+
+        // Loop until the search range is exhausted
+        while (low <= high) {
+            // Compute middle index safely
+            int mid = low + (high - low) / 2;
+
+            int comparisonResult = searchKey.compareToIgnoreCase(sortedBogieIds[mid]);
+
+            if (comparisonResult == 0) {
+                return mid; // Match found -> Return index
+            } else if (comparisonResult > 0) {
+                low = mid + 1; // Key lies in the right half -> Adjust low index
+            } else {
+                high = mid - 1; // Key lies in the left half -> Adjust high index
             }
         }
-        return -1; // Traversing completed without finding a match
+
+        return -1; // Search range exhausted, element not found
     }
 
     public static void main(String[] args) {
+        System.out.println("=================================================");
+        System.out.println(" UC19: Binary Search for Bogie ID (O(log n))    ");
+        System.out.println("=================================================");
 
-        System.out.println(" UC18: Linear Search for Bogie ID                ");
-
-        // 1. Unsorted list of Bogie IDs in the train consist
+        // 1. Initial unsorted list of Bogie IDs
         String[] bogieIds = {"PB-104", "GB-201", "PB-101", "GB-205", "PB-102", "GB-203"};
 
-        System.out.println("\nAvailable Bogies in Consist:");
+        // Precondition Requirement: Binary search requires sorted data
+        System.out.println("\n--- Step 1: Sorting Bogie IDs (Precondition) ---");
+        System.out.println("Unsorted Bogie IDs: " + Arrays.toString(bogieIds));
+
+        Arrays.sort(bogieIds); // Ensure sorted order before searching
+
+        System.out.println("Sorted Bogie IDs  : " + Arrays.toString(bogieIds));
+
+        System.out.println("\nIndexed Bogies in Consist:");
         for (int i = 0; i < bogieIds.length; i++) {
             System.out.println(" Index [" + i + "] : " + bogieIds[i]);
         }
 
         Scanner scanner = new Scanner(System.in);
 
-        // 2. User provides search key
+        // 2. Accept search key from user
         System.out.print("\nEnter Bogie ID to search: ");
         String searchKey = scanner.nextLine().trim();
 
-        // 3. Execute Linear Search algorithm
-        System.out.println("\nTraversing array sequentially for '" + searchKey + "'...");
-        int index = linearSearch(bogieIds, searchKey);
+        // 3. Perform Binary Search
+        System.out.println("\nPerforming Binary Search for '" + searchKey + "'...");
+        int index = binarySearch(bogieIds, searchKey);
 
         // 4. Output results based on search outcome
         System.out.println("-------------------------------------------------");
         if (index != -1) {
-            System.out.println("Result: Bogie ID '" + searchKey + "' WAS FOUND at Position/Index " + index + ".");
+            System.out.println("Result: Bogie ID '" + searchKey + "' WAS FOUND at Index " + index + " in sorted consist.");
         } else {
             System.out.println("Result: Bogie ID '" + searchKey + "' WAS NOT FOUND in the consist.");
         }
         System.out.println("-------------------------------------------------");
 
         scanner.close();
-
     }
-
 }
