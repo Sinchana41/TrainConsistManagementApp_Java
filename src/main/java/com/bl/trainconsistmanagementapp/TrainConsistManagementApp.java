@@ -1,12 +1,9 @@
 package com.bl.trainconsistmanagementapp;
 
-import com.bl.trainconsistmanagementapp.model.Bogie;
-import com.bl.trainconsistmanagementapp.model.GoodsBogie;
+import com.bl.trainconsistmanagementapp.exception.InvalidCapacityException;
 import com.bl.trainconsistmanagementapp.model.PassengerBogie;
+import com.bl.trainconsistmanagementapp.service.TrainConsist;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.bl.trainconsistmanagementapp.fileio.FileIOAndPersistence.*;
 
@@ -14,30 +11,43 @@ public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
 
-        System.out.println(" UC17: Persistence and File I/O for Consist");
+        System.out.println("UC14: Handle Invalid Bogie Capacity");
 
-        // 1. Prepare sample bogies
-        List<Bogie> originalConsist = new ArrayList<>();
-        originalConsist.add(new PassengerBogie("PB-101", "Sleeper", 72));
-        originalConsist.add(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
-        originalConsist.add(new PassengerBogie("PB-102", "AC Chair", 56));
-        originalConsist.add(new GoodsBogie("GB-202", "Box Car", "Coal", 65.0));
+        TrainConsist consist = new TrainConsist();
 
-        // 2. Export/Save consist configuration to file
-        System.out.println("\nStep 1: Saving Consist Data to File");
-        saveConsistToFile(originalConsist, FILE_PATH);
-
-        // 3. Import/Load consist configuration from file
-        System.out.println("\nStep 2: Restoring Consist Data from File");
-        List<Bogie> restoredConsist = loadConsistFromFile(FILE_PATH);
-
-        // 4. Verify loaded records
-        System.out.println("\nStep 3: Verifying Loaded Consist");
-        for (int i = 0; i < restoredConsist.size(); i++) {
-            System.out.printf("Position %d: %s%n", i + 1, restoredConsist.get(i));
+        // Scenario 1: Attempting to create a valid Passenger Bogie
+        System.out.println("Scenario 1: Creating Valid Passenger Bogie");
+        try {
+            PassengerBogie pb1 = new PassengerBogie("PB-101", "Sleeper", 72);
+            consist.addBogie(pb1);
+            System.out.println("Created and Attached: " + pb1);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Creation Failed: " + e.getMessage());
         }
 
-        // Clean up temporary benchmark file
-        new File(FILE_PATH).deleteOnExit();
+        // Scenario 2: Attempting to create Bogie with ZERO capacity
+        System.out.println("Scenario 2: Creating Bogie with Zero Capacity");
+        try {
+            PassengerBogie pb2 = new PassengerBogie("PB-102", "AC Chair", 0);
+            consist.addBogie(pb2);
+            System.out.println("Created and Attached: " + pb2);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Caught Custom Exception: " + e.getMessage());
+        }
+
+        // Scenario 3: Attempting to create Bogie with NEGATIVE capacity
+        System.out.println("Scenario 3: Creating Bogie with Negative Capacity");
+        try {
+            PassengerBogie pb3 = new PassengerBogie("PB-103", "First Class", -20);
+            consist.addBogie(pb3);
+            System.out.println("Created and Attached: " + pb3);
+        } catch (InvalidCapacityException e) {
+            System.out.println("Caught Custom Exception: " + e.getMessage());
+        }
+
+        // Final Consist Status
+        System.out.println("Final Verified Train Consist");
+        consist.displayConsistDetails();
+
     }
 }
