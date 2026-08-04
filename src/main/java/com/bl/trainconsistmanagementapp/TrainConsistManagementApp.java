@@ -1,74 +1,64 @@
 package com.bl.trainconsistmanagementapp;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class TrainConsistManagementApp {
 
-    public static int binarySearch(String[] sortedBogieIds, String searchKey) {
-        int low = 0;
-        int high = sortedBogieIds.length - 1;
-
-        // Loop until the search range is exhausted
-        while (low <= high) {
-            // Compute middle index safely
-            int mid = low + (high - low) / 2;
-
-            int comparisonResult = searchKey.compareToIgnoreCase(sortedBogieIds[mid]);
-
-            if (comparisonResult == 0) {
-                return mid; // Match found -> Return index
-            } else if (comparisonResult > 0) {
-                low = mid + 1; // Key lies in the right half -> Adjust low index
-            } else {
-                high = mid - 1; // Key lies in the left half -> Adjust high index
-            }
+    public static int searchBogie(List<String> bogieIds, String searchKey) {
+        // State Validation: Check whether the bogie collection is empty before searching
+        if (bogieIds == null || bogieIds.isEmpty()) {
+            // Fail-Fast Principle: Stop execution immediately and throw IllegalStateException
+            throw new IllegalStateException("Search Failed: Cannot perform search on an empty train consist. Please add bogies first.");
         }
 
-        return -1; // Search range exhausted, element not found
+        // Search logic executes only if state is valid
+        for (int i = 0; i < bogieIds.size(); i++) {
+            if (bogieIds.get(i).equalsIgnoreCase(searchKey)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     public static void main(String[] args) {
-        System.out.println("=================================================");
-        System.out.println(" UC19: Binary Search for Bogie ID (O(log n))    ");
-        System.out.println("=================================================");
 
-        // 1. Initial unsorted list of Bogie IDs
-        String[] bogieIds = {"PB-104", "GB-201", "PB-101", "GB-205", "PB-102", "GB-203"};
+        System.out.println(" UC20: Exception Handling During Search          ");
 
-        // Precondition Requirement: Binary search requires sorted data
-        System.out.println("\n--- Step 1: Sorting Bogie IDs (Precondition) ---");
-        System.out.println("Unsorted Bogie IDs: " + Arrays.toString(bogieIds));
+        System.out.println("\n--- Scenario 1: Searching in an Empty Train Consist ---");
+        List<String> emptyConsist = new ArrayList<>();
 
-        Arrays.sort(bogieIds); // Ensure sorted order before searching
-
-        System.out.println("Sorted Bogie IDs  : " + Arrays.toString(bogieIds));
-
-        System.out.println("\nIndexed Bogies in Consist:");
-        for (int i = 0; i < bogieIds.length; i++) {
-            System.out.println(" Index [" + i + "] : " + bogieIds[i]);
+        try {
+            System.out.println("Triggering search for 'PB-101' in empty consist...");
+            searchBogie(emptyConsist, "PB-101");
+        } catch (IllegalStateException e) {
+            System.out.println("CAUGHT RUNTIME EXCEPTION: " + e.getMessage());
         }
 
-        Scanner scanner = new Scanner(System.in);
+        // Scenario 2: Searching on a VALID (Non-Empty) Consist
+        System.out.println("\n--- Scenario 2: Searching in a Populated Train Consist ---");
+        List<String> validConsist = new ArrayList<>();
+        validConsist.add("PB-101");
+        validConsist.add("GB-201");
+        validConsist.add("PB-102");
 
-        // 2. Accept search key from user
-        System.out.print("\nEnter Bogie ID to search: ");
-        String searchKey = scanner.nextLine().trim();
+        System.out.println("Current Consist: " + validConsist);
 
-        // 3. Perform Binary Search
-        System.out.println("\nPerforming Binary Search for '" + searchKey + "'...");
-        int index = binarySearch(bogieIds, searchKey);
+        try {
+            String searchKey = "GB-201";
+            System.out.println("Triggering search for '" + searchKey + "'...");
+            int index = searchBogie(validConsist, searchKey);
 
-        // 4. Output results based on search outcome
-        System.out.println("-------------------------------------------------");
-        if (index != -1) {
-            System.out.println("Result: Bogie ID '" + searchKey + "' WAS FOUND at Index " + index + " in sorted consist.");
-        } else {
-            System.out.println("Result: Bogie ID '" + searchKey + "' WAS NOT FOUND in the consist.");
+            if (index != -1) {
+                System.out.println("Result: Bogie ID '" + searchKey + "' WAS FOUND at Index " + index + ".");
+            } else {
+                System.out.println("Result: Bogie ID '" + searchKey + "' WAS NOT FOUND.");
+            }
+        } catch (IllegalStateException e) {
+            System.out.println("CAUGHT RUNTIME EXCEPTION: " + e.getMessage());
         }
-        System.out.println("-------------------------------------------------");
-
-        scanner.close();
     }
 }
