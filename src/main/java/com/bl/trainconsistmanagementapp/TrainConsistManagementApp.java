@@ -1,42 +1,54 @@
 package com.bl.trainconsistmanagementapp;
 
-import com.bl.trainconsistmanagementapp.model.Bogie;
-import com.bl.trainconsistmanagementapp.model.GoodsBogie;
-import com.bl.trainconsistmanagementapp.model.PassengerBogie;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.bl.trainconsistmanagementapp.fileio.FileIOAndPersistence.*;
+import java.util.Scanner;
 
 public class TrainConsistManagementApp {
 
+    public static int linearSearch(String[] bogieIds, String searchKey) {
+        // Sequential Traversal from index 0 to length - 1
+        for (int i = 0; i < bogieIds.length; i++) {
+            // Equality Comparison using equalsIgnoreCase for safe string comparison
+            if (bogieIds[i].equalsIgnoreCase(searchKey)) {
+                return i; // Match found -> Early Termination
+            }
+        }
+        return -1; // Traversing completed without finding a match
+    }
+
     public static void main(String[] args) {
 
-        System.out.println(" UC17: Persistence and File I/O for Consist");
+        System.out.println(" UC18: Linear Search for Bogie ID                ");
 
-        // 1. Prepare sample bogies
-        List<Bogie> originalConsist = new ArrayList<>();
-        originalConsist.add(new PassengerBogie("PB-101", "Sleeper", 72));
-        originalConsist.add(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
-        originalConsist.add(new PassengerBogie("PB-102", "AC Chair", 56));
-        originalConsist.add(new GoodsBogie("GB-202", "Box Car", "Coal", 65.0));
+        // 1. Unsorted list of Bogie IDs in the train consist
+        String[] bogieIds = {"PB-104", "GB-201", "PB-101", "GB-205", "PB-102", "GB-203"};
 
-        // 2. Export/Save consist configuration to file
-        System.out.println("\nStep 1: Saving Consist Data to File");
-        saveConsistToFile(originalConsist, FILE_PATH);
-
-        // 3. Import/Load consist configuration from file
-        System.out.println("\nStep 2: Restoring Consist Data from File");
-        List<Bogie> restoredConsist = loadConsistFromFile(FILE_PATH);
-
-        // 4. Verify loaded records
-        System.out.println("\nStep 3: Verifying Loaded Consist");
-        for (int i = 0; i < restoredConsist.size(); i++) {
-            System.out.printf("Position %d: %s%n", i + 1, restoredConsist.get(i));
+        System.out.println("\nAvailable Bogies in Consist:");
+        for (int i = 0; i < bogieIds.length; i++) {
+            System.out.println(" Index [" + i + "] : " + bogieIds[i]);
         }
-        // Clean up temporary benchmark file
-        new File(FILE_PATH).deleteOnExit();
+
+        Scanner scanner = new Scanner(System.in);
+
+        // 2. User provides search key
+        System.out.print("\nEnter Bogie ID to search: ");
+        String searchKey = scanner.nextLine().trim();
+
+        // 3. Execute Linear Search algorithm
+        System.out.println("\nTraversing array sequentially for '" + searchKey + "'...");
+        int index = linearSearch(bogieIds, searchKey);
+
+        // 4. Output results based on search outcome
+        System.out.println("-------------------------------------------------");
+        if (index != -1) {
+            System.out.println("Result: Bogie ID '" + searchKey + "' WAS FOUND at Position/Index " + index + ".");
+        } else {
+            System.out.println("Result: Bogie ID '" + searchKey + "' WAS NOT FOUND in the consist.");
+        }
+        System.out.println("-------------------------------------------------");
+
+        scanner.close();
+
     }
+
 }
