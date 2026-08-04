@@ -1,58 +1,65 @@
 package com.bl.trainconsistmanagementapp;
 
-import com.bl.trainconsistmanagementapp.exception.BogieNotFoundException;
-import com.bl.trainconsistmanagementapp.exception.InvalidBogieException;
-import com.bl.trainconsistmanagementapp.model.GoodsBogie;
-import com.bl.trainconsistmanagementapp.model.PassengerBogie;
-import com.bl.trainconsistmanagementapp.service.TrainConsist;
 
 public class TrainConsistManagementApp {
+    public static void bubbleSort(int[] capacities) {
+        int n = capacities.length;
+
+        // Outer loop: Controls the number of passes over the array
+        for (int i = 0; i < n - 1; i++) {
+            boolean swapped = false; // Optimization flag to stop early if already sorted
+
+            // Inner loop: Compares adjacent elements and swaps if out of order
+            for (int j = 0; j < n - 1 - i; j++) {
+                if (capacities[j] > capacities[j + 1]) {
+                    // Swapping Logic using a temporary variable
+                    int temp = capacities[j];
+                    capacities[j] = capacities[j + 1];
+                    capacities[j + 1] = temp;
+
+                    swapped = true;
+                }
+            }
+
+            // If no elements were swapped during a pass, the array is already sorted
+            if (!swapped) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Utility method to print array elements in a single line.
+     */
+    public static void printArray(int[] arr) {
+        System.out.print("[");
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i]);
+            if (i < arr.length - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
+    }
 
     public static void main(String[] args) {
 
-        System.out.println(" UC16: Custom Exceptions & Fault Tolerance       ");
-        TrainConsist consist = new TrainConsist();
+        System.out.println(" UC16: Sort Passenger Bogies (Bubble Sort)       ");
 
-        // Scenario 1: Handling Invalid Bogie Attachment
-        System.out.println("\n--- Test 1: Adding Valid and Invalid Bogies ---");
+        // 1. Unsorted array of passenger bogie capacities
+        int[] capacities = {72, 24, 108, 56, 18, 90, 36};
 
-        try {
-            consist.addBogie(new PassengerBogie("PB-101", "Sleeper", 72));
-            consist.addBogie(new GoodsBogie("GB-201", "Cylindrical", "Petroleum", 50.0));
+        // 2. Display initial unsorted state
+        System.out.print("\nInitial Unsorted Capacities : ");
+        printArray(capacities);
 
-            // Intentionally adding invalid ID format
-            System.out.println("Attempting to attach invalid Bogie ID 'INVALID_ID'...");
-            consist.addBogie(new PassengerBogie("INVALID_ID", "AC Chair", 56));
-        } catch (InvalidBogieException e) {
-            System.out.println("Caught Exception: " + e.getMessage());
-        }
+        // 3. Perform manual Bubble Sort
+        System.out.println("\nSorting capacities using Bubble Sort algorithm...");
+        bubbleSort(capacities);
 
-        consist.displayConsistDetails();
+        // 4. Display final sorted state
+        System.out.print("\nSorted Capacities (Ascending) : ");
+        printArray(capacities);
 
-        // Scenario 2: Handling Non-Existent Bogie Search
-        System.out.println("\n--- Test 2: Searching for Missing Bogie ---");
-
-        try {
-            System.out.println("Searching for Bogie 'PB-999'...");
-            consist.findBogieById("PB-999");
-        } catch (BogieNotFoundException e) {
-            System.out.println("Caught Exception: " + e.getMessage());
-        }
-
-        // Scenario 3: Handling Non-Existent Bogie Removal
-        System.out.println("\n--- Test 3: Detaching Missing Bogie ---");
-
-        try {
-            System.out.println("Attempting to detach Bogie 'GB-201'...");
-            consist.removeBogieById("GB-201"); // Succeeds
-
-            System.out.println("Attempting to detach Bogie 'GB-201' again...");
-            consist.removeBogieById("GB-201"); // Fails, already removed
-        } catch (BogieNotFoundException e) {
-            System.out.println("Caught Exception: " + e.getMessage());
-        } finally {
-            System.out.println("\n--- Final Status Verification ---");
-            consist.displayConsistDetails();
-        }
     }
 }
