@@ -5,8 +5,9 @@ import com.bl.trainconsistmanagementapp.model.PassengerBogie;
 import com.bl.trainconsistmanagementapp.service.TrainConsist;
 
 
-public class TrainConsistManagementApp {
+import static com.bl.trainconsistmanagementapp.fileio.FileIOAndPersistence.*;
 
+public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
 
