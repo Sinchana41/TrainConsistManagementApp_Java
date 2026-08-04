@@ -36,7 +36,6 @@ public class TrainConsistManagementApp {
         for (int i = 0; i < restoredConsist.size(); i++) {
             System.out.printf("Position %d: %s%n", i + 1, restoredConsist.get(i));
         }
-
         // Clean up temporary benchmark file
         new File(FILE_PATH).deleteOnExit();
     }
