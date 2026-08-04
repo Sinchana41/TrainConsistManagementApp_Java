@@ -3,7 +3,7 @@ package com.bl.trainconsistmanagementapp;
 import com.bl.trainconsistmanagementapp.exception.CargoSafetyException;
 import com.bl.trainconsistmanagementapp.model.GoodsBogie;
 
-public class TrainConsistManagementApp {
+import static com.bl.trainconsistmanagementapp.fileio.FileIOAndPersistence.*;
 
         /**
          * Helper method demonstrating structured try-catch-finally error handling.
