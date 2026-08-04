@@ -1,45 +1,65 @@
 package com.bl.trainconsistmanagementapp;
 
-import com.bl.trainconsistmanagementapp.exception.CargoSafetyException;
-import com.bl.trainconsistmanagementapp.model.GoodsBogie;
 
-import static com.bl.trainconsistmanagementapp.fileio.FileIOAndPersistence.*;
+public class TrainConsistManagementApp {
+    public static void bubbleSort(int[] capacities) {
+        int n = capacities.length;
 
-        /**
-         * Helper method demonstrating structured try-catch-finally error handling.
-         */
-        public static void processCargoAssignment(GoodsBogie bogie, String cargoType) {
-            System.out.println("-------------------------------------------------");
-            try {
-                // Operation that might throw CargoSafetyException
-                bogie.assignCargo(cargoType);
-            } catch (CargoSafetyException e) {
-                // Catch and handle runtime exception gracefully
-                System.out.println("CAUGHT RUNTIME EXCEPTION: " + e.getMessage());
-            } finally {
-                // Mandatory completion log/cleanup that runs regardless of outcome
-                System.out.println("[FINALLY BLOCK]: Completed safety check audit log for " + bogie.getBogieId());
+        // Outer loop: Controls the number of passes over the array
+        for (int i = 0; i < n - 1; i++) {
+            boolean swapped = false; // Optimization flag to stop early if already sorted
+
+            // Inner loop: Compares adjacent elements and swaps if out of order
+            for (int j = 0; j < n - 1 - i; j++) {
+                if (capacities[j] > capacities[j + 1]) {
+                    // Swapping Logic using a temporary variable
+                    int temp = capacities[j];
+                    capacities[j] = capacities[j + 1];
+                    capacities[j + 1] = temp;
+
+                    swapped = true;
+                }
+            }
+
+            // If no elements were swapped during a pass, the array is already sorted
+            if (!swapped) {
+                break;
             }
         }
+    }
 
-        public static void main(String[] args) {
-            System.out.println(" UC15: Safe Cargo Assignment (try-catch-finally) ");
+    /**
+     * Utility method to print array elements in a single line.
+     */
+    public static void printArray(int[] arr) {
+        System.out.print("[");
+        for (int i = 0; i < arr.length; i++) {
+            System.out.print(arr[i]);
+            if (i < arr.length - 1) {
+                System.out.print(", ");
+            }
+        }
+        System.out.println("]");
+    }
 
-            // Prepare Goods Bogies
-            GoodsBogie cylindricalTanker = new GoodsBogie("GB-201", "Cylindrical", "Empty", 50.0);
-            GoodsBogie rectangularBoxCar = new GoodsBogie("GB-202", "Box Car", "Empty", 65.0);
+    public static void main(String[] args) {
 
-            // Scenario 1: Safe Assignment (Petroleum -> Cylindrical Bogie)
-            System.out.println("\n--- Scenario 1: Valid Cargo Assignment ---");
-            processCargoAssignment(cylindricalTanker, "Petroleum");
+        System.out.println(" UC16: Sort Passenger Bogies (Bubble Sort)       ");
 
-            // Scenario 2: Unsafe Assignment (Petroleum -> Rectangular/Box Car Bogie)
-            System.out.println("\n--- Scenario 2: Unsafe Cargo Assignment (Triggers Exception) ---");
-            processCargoAssignment(rectangularBoxCar, "Petroleum");
+        // 1. Unsorted array of passenger bogie capacities
+        int[] capacities = {72, 24, 108, 56, 18, 90, 36};
 
-            // Scenario 3: Safe Assignment for Box Car (Coal -> Box Car)
-            System.out.println("\n--- Scenario 3: Valid Cargo Assignment for Box Car ---");
-            processCargoAssignment(rectangularBoxCar, "Coal");
+        // 2. Display initial unsorted state
+        System.out.print("\nInitial Unsorted Capacities : ");
+        printArray(capacities);
+
+        // 3. Perform manual Bubble Sort
+        System.out.println("\nSorting capacities using Bubble Sort algorithm...");
+        bubbleSort(capacities);
+
+        // 4. Display final sorted state
+        System.out.print("\nSorted Capacities (Ascending) : ");
+        printArray(capacities);
 
     }
 }
