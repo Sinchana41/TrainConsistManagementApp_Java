@@ -1,53 +1,45 @@
 package com.bl.trainconsistmanagementapp;
 
-import com.bl.trainconsistmanagementapp.exception.InvalidCapacityException;
-import com.bl.trainconsistmanagementapp.model.PassengerBogie;
-import com.bl.trainconsistmanagementapp.service.TrainConsist;
-
+import com.bl.trainconsistmanagementapp.exception.CargoSafetyException;
+import com.bl.trainconsistmanagementapp.model.GoodsBogie;
 
 import static com.bl.trainconsistmanagementapp.fileio.FileIOAndPersistence.*;
 
-public class TrainConsistManagementApp {
-
-    public static void main(String[] args) {
-
-        System.out.println("UC14: Handle Invalid Bogie Capacity");
-
-        TrainConsist consist = new TrainConsist();
-
-        // Scenario 1: Attempting to create a valid Passenger Bogie
-        System.out.println("Scenario 1: Creating Valid Passenger Bogie");
-        try {
-            PassengerBogie pb1 = new PassengerBogie("PB-101", "Sleeper", 72);
-            consist.addBogie(pb1);
-            System.out.println("Created and Attached: " + pb1);
-        } catch (InvalidCapacityException e) {
-            System.out.println("Creation Failed: " + e.getMessage());
+        /**
+         * Helper method demonstrating structured try-catch-finally error handling.
+         */
+        public static void processCargoAssignment(GoodsBogie bogie, String cargoType) {
+            System.out.println("-------------------------------------------------");
+            try {
+                // Operation that might throw CargoSafetyException
+                bogie.assignCargo(cargoType);
+            } catch (CargoSafetyException e) {
+                // Catch and handle runtime exception gracefully
+                System.out.println("CAUGHT RUNTIME EXCEPTION: " + e.getMessage());
+            } finally {
+                // Mandatory completion log/cleanup that runs regardless of outcome
+                System.out.println("[FINALLY BLOCK]: Completed safety check audit log for " + bogie.getBogieId());
+            }
         }
 
-        // Scenario 2: Attempting to create Bogie with ZERO capacity
-        System.out.println("Scenario 2: Creating Bogie with Zero Capacity");
-        try {
-            PassengerBogie pb2 = new PassengerBogie("PB-102", "AC Chair", 0);
-            consist.addBogie(pb2);
-            System.out.println("Created and Attached: " + pb2);
-        } catch (InvalidCapacityException e) {
-            System.out.println("Caught Custom Exception: " + e.getMessage());
-        }
+        public static void main(String[] args) {
+            System.out.println(" UC15: Safe Cargo Assignment (try-catch-finally) ");
 
-        // Scenario 3: Attempting to create Bogie with NEGATIVE capacity
-        System.out.println("Scenario 3: Creating Bogie with Negative Capacity");
-        try {
-            PassengerBogie pb3 = new PassengerBogie("PB-103", "First Class", -20);
-            consist.addBogie(pb3);
-            System.out.println("Created and Attached: " + pb3);
-        } catch (InvalidCapacityException e) {
-            System.out.println("Caught Custom Exception: " + e.getMessage());
-        }
+            // Prepare Goods Bogies
+            GoodsBogie cylindricalTanker = new GoodsBogie("GB-201", "Cylindrical", "Empty", 50.0);
+            GoodsBogie rectangularBoxCar = new GoodsBogie("GB-202", "Box Car", "Empty", 65.0);
 
-        // Final Consist Status
-        System.out.println("Final Verified Train Consist");
-        consist.displayConsistDetails();
+            // Scenario 1: Safe Assignment (Petroleum -> Cylindrical Bogie)
+            System.out.println("\n--- Scenario 1: Valid Cargo Assignment ---");
+            processCargoAssignment(cylindricalTanker, "Petroleum");
+
+            // Scenario 2: Unsafe Assignment (Petroleum -> Rectangular/Box Car Bogie)
+            System.out.println("\n--- Scenario 2: Unsafe Cargo Assignment (Triggers Exception) ---");
+            processCargoAssignment(rectangularBoxCar, "Petroleum");
+
+            // Scenario 3: Safe Assignment for Box Car (Coal -> Box Car)
+            System.out.println("\n--- Scenario 3: Valid Cargo Assignment for Box Car ---");
+            processCargoAssignment(rectangularBoxCar, "Coal");
 
     }
 }
